@@ -8,12 +8,17 @@
 </head>
 <body>
     <header class="game-header">
-        <div class="logo"><img src="https://dev.elevaite365.com/assets/logo_white-uTyGRE7X.png"/> </div>
+        <div class="logo">elevaite365</div>
         <div class="tagline">Automated Software Testing</div>
     </header>
     
     <video id="video" autoplay playsinline></video>
     <canvas id="canvas"></canvas>
-    <script type="module" src="src/main.js"></script>
+    
+    <!-- Load HandTrack.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/handtrackjs@0.1.1/dist/handtrack.min.js"></script>
+    
+    <!-- Load our game script (no longer a module) -->
+    <script src="src/main.js"></script>
 </body>
 </html>

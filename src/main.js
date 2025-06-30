@@ -1,4 +1,5 @@
-import * as handTrack from 'handtrackjs';
+// HandTrack.js will be loaded from CDN via script tag in HTML
+// Global handTrack object will be available
 
 let video, canvas, ctx, model, isVideo = false;
 let score = 0;
