@@ -12,13 +12,18 @@
         <div class="tagline">Automated Software Testing</div>
     </header>
     
+    <div id="startScreen" class="start-screen">
+        <div class="start-content">
+            <h1>🐛 Bug Catcher</h1>
+            <p>Use your hands to catch the falling bugs!</p>
+            <button id="startButton" class="start-button">Start Game</button>
+            <p class="instructions">Click to enable audio and camera</p>
+        </div>
+    </div>
+    
     <video id="video" autoplay playsinline></video>
     <canvas id="canvas"></canvas>
     
-    <!-- Load HandTrack.js from unpkg CDN (browser-compatible version) -->
-    <script src="https://unpkg.com/handtrackjs@0.1.1/dist/handtrack.js"></script>
-    
-    <!-- Load our game script (no longer a module) -->
-    <script src="src/main.js"></script>
+    <script type="module" src="src/main.js"></script>
 </body>
 </html>

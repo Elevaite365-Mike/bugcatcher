@@ -1,5 +1,4 @@
-// HandTrack.js will be loaded from CDN via script tag in HTML
-// Global handTrack object will be available
+import * as handTrack from 'handtrackjs';
 
 let video, canvas, ctx, model, isVideo = false;
 let score = 0;
@@ -309,6 +308,28 @@ async function init() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     
+    // Set up start button
+    const startButton = document.getElementById('startButton');
+    const startScreen = document.getElementById('startScreen');
+    
+    startButton.addEventListener('click', async () => {
+        console.log('Start button clicked - enabling audio and starting game');
+        
+        // Enable audio context (required for user interaction)
+        if (audioContext && audioContext.state === 'suspended') {
+            await audioContext.resume();
+            console.log('Audio context resumed');
+        }
+        
+        // Hide start screen
+        startScreen.classList.add('hidden');
+        
+        // Load model and start game
+        await startGame();
+    });
+}
+
+async function startGame() {
     // Load model first
     console.log('Loading hand tracking model...');
     model = await handTrack.load(modelParams);
@@ -380,10 +401,15 @@ function showPredictions(predictions) {
     if (gameOver) {
         drawGameOverScreen();
         
-        // Still check for play again button interaction
+        // Check if any hand is over the restart button
+        let handOverButton = false;
         if (handPredictions.length > 0) {
             handPredictions.forEach(prediction => {
-                checkPlayAgainButton(prediction.bbox);
+                // Check if this hand is over the button
+                if (isHandOverRestartButton(prediction.bbox)) {
+                    handOverButton = true;
+                    checkPlayAgainButton(prediction.bbox);
+                }
                 
                 // Only draw debug info in debug mode
                 if (debugMode) {
@@ -394,6 +420,14 @@ function showPredictions(predictions) {
                 }
             });
         }
+        
+        // If no hand is over button, cancel the hold
+        if (!handOverButton && isHoldingRestart) {
+            isHoldingRestart = false;
+            restartHoldStart = 0;
+            console.log('Hold cancelled - no hand over button');
+        }
+        
         return;
     }
     
@@ -588,7 +622,8 @@ function drawGameOverScreen() {
     ctx.lineWidth = 2;
     
     if (isHoldingRestart) {
-        const remainingTime = Math.ceil((restartHoldDuration - (Date.now() - restartHoldStart)) / 1000);
+        const elapsed = Date.now() - restartHoldStart;
+        const remainingTime = Math.max(1, Math.ceil((restartHoldDuration - elapsed) / 1000));
         ctx.strokeText(`HOLD (${remainingTime}s)`, centerX, buttonY + 32);
         ctx.fillText(`HOLD (${remainingTime}s)`, centerX, buttonY + 32);
     } else {
@@ -608,71 +643,48 @@ function drawGameOverScreen() {
     ctx.textAlign = 'left';
 }
 
-function checkPlayAgainButton(handBbox) {
-    if (!gameOver) return;
+// Helper function to check if hand is over restart button
+function isHandOverRestartButton(handBbox) {
+    if (!gameOver) return false;
     
     const [handX, handY, handWidth, handHeight] = handBbox;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const buttonWidth = 160; // Updated to match smaller button
-    const buttonHeight = 50; // Updated to match smaller button
+    const buttonWidth = 160;
+    const buttonHeight = 50;
     const buttonX = centerX - buttonWidth / 2;
     const buttonY = centerY + 40;
     
     // Check if hand overlaps with play again button
-    const isOverButton = (handX < buttonX + buttonWidth && handX + handWidth > buttonX &&
-                         handY < buttonY + buttonHeight && handY + handHeight > buttonY);
+    return (handX < buttonX + buttonWidth && handX + handWidth > buttonX &&
+            handY < buttonY + buttonHeight && handY + handHeight > buttonY);
+}
+
+function checkPlayAgainButton(handBbox) {
+    if (!gameOver) return;
     
-    if (isOverButton) {
-        // Start holding if not already holding
-        if (!isHoldingRestart) {
-            isHoldingRestart = true;
-            restartHoldStart = Date.now();
-            console.log('Started holding restart button');
-        }
-        
-        // Check if hold duration is complete
-        const elapsed = Date.now() - restartHoldStart;
-        if (elapsed >= restartHoldDuration) {
-            // Restart game
-            score = 0;
-            missedBugs = 0;
-            gameOver = false;
-            bugs = [];
-            splashes = []; // Clear splash effects
-            isHoldingRestart = false;
-            restartHoldStart = 0;
-            startBackgroundMusic(); // Restart music when game restarts
-            console.log('Game restarted after 5 second hold!');
-        }
-    } else {
-        // Hand is not over button, reset hold
-        if (isHoldingRestart) {
-            isHoldingRestart = false;
-            restartHoldStart = 0;
-            console.log('Hold cancelled - hand moved away from button');
-        }
+    // Start holding if not already holding
+    if (!isHoldingRestart) {
+        isHoldingRestart = true;
+        restartHoldStart = Date.now();
+        console.log('Started holding restart button');
+    }
+    
+    // Check if hold duration is complete
+    const elapsed = Date.now() - restartHoldStart;
+    if (elapsed >= restartHoldDuration) {
+        // Restart game
+        score = 0;
+        missedBugs = 0;
+        gameOver = false;
+        bugs = [];
+        splashes = []; // Clear splash effects
+        isHoldingRestart = false;
+        restartHoldStart = 0;
+        startBackgroundMusic(); // Restart music when game restarts
+        console.log('Game restarted after 5 second hold!');
     }
 }
 
-// Start when page loads and HandTrack.js is available
-window.addEventListener('DOMContentLoaded', function() {
-    // Check if handTrack is available
-    if (typeof handTrack !== 'undefined') {
-        console.log('HandTrack.js loaded successfully');
-        init();
-    } else {
-        console.error('HandTrack.js failed to load');
-        // Try again after a short delay
-        setTimeout(function() {
-            if (typeof handTrack !== 'undefined') {
-                console.log('HandTrack.js loaded on retry');
-                init();
-            } else {
-                console.error('HandTrack.js still not available after retry');
-                // Show error message to user
-                document.body.innerHTML = '<div style="color: white; text-align: center; padding: 50px; font-family: Arial;">Error: HandTrack.js library failed to load. Please refresh the page.</div>';
-            }
-        }, 2000);
-    }
-});
+// Start when page loads
+window.addEventListener('DOMContentLoaded', init);
