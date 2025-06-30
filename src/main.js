@@ -24,7 +24,7 @@ function checkDebugMode() {
 
 // Initialize and control background music
 function initBackgroundMusic() {
-    backgroundMusic = new Audio('./bgmusic.mp3');
+    backgroundMusic = new Audio('/bgmusic.mp3');
     backgroundMusic.loop = true;
     backgroundMusic.volume = 0.3; // Adjust volume as needed
     
@@ -100,7 +100,7 @@ function playBugSpawnSound() {
 
 function playBugCaughtSound() {
     // Play custom bug smash sound
-    const audio = new Audio('./bugsmash.mp3');
+    const audio = new Audio('/bugsmash.mp3');
     audio.volume = 0.5; // Adjust volume as needed
     audio.play().catch(err => {
         console.log('Could not play bug smash sound:', err);
