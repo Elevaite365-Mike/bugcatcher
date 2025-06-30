@@ -22,9 +22,13 @@ function checkDebugMode() {
 }
 
 
+// Import audio files as assets
+import bgMusicUrl from '/bgmusic.mp3?url';
+import bugSmashUrl from '/bugsmash.mp3?url';
+
 // Initialize and control background music
 function initBackgroundMusic() {
-    backgroundMusic = new Audio('/bgmusic.mp3');
+    backgroundMusic = new Audio(bgMusicUrl);
     backgroundMusic.loop = true;
     backgroundMusic.volume = 0.3; // Adjust volume as needed
     
@@ -100,7 +104,7 @@ function playBugSpawnSound() {
 
 function playBugCaughtSound() {
     // Play custom bug smash sound
-    const audio = new Audio('/bugsmash.mp3');
+    const audio = new Audio(bugSmashUrl);
     audio.volume = 0.5; // Adjust volume as needed
     audio.play().catch(err => {
         console.log('Could not play bug smash sound:', err);
