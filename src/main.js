@@ -24,7 +24,7 @@ function checkDebugMode() {
 
 // Initialize and control background music
 function initBackgroundMusic() {
-    backgroundMusic = new Audio('bgmusic.mp3');
+    backgroundMusic = new Audio('./bgmusic.mp3');
     backgroundMusic.loop = true;
     backgroundMusic.volume = 0.3; // Adjust volume as needed
     
@@ -34,6 +34,17 @@ function initBackgroundMusic() {
     
     backgroundMusic.addEventListener('error', (e) => {
         console.log('Background music failed to load:', e);
+        console.log('Audio file may not exist or format not supported');
+        // Continue without background music
+        backgroundMusic = null;
+    });
+    
+    backgroundMusic.addEventListener('loadstart', () => {
+        console.log('Started loading background music...');
+    });
+    
+    backgroundMusic.addEventListener('loadeddata', () => {
+        console.log('Background music data loaded');
     });
 }
 
@@ -89,10 +100,12 @@ function playBugSpawnSound() {
 
 function playBugCaughtSound() {
     // Play custom bug smash sound
-    const audio = new Audio('bugsmash.mp3');
+    const audio = new Audio('./bugsmash.mp3');
     audio.volume = 0.5; // Adjust volume as needed
     audio.play().catch(err => {
-        console.log('Could not play sound:', err);
+        console.log('Could not play bug smash sound:', err);
+        // Fall back to synthesized sound if file doesn't load
+        playSound(150, 0.2, 'square', 0.3);
     });
 }
 
