@@ -655,5 +655,24 @@ function checkPlayAgainButton(handBbox) {
     }
 }
 
-// Start when page loads
-window.addEventListener('DOMContentLoaded', init);
+// Start when page loads and HandTrack.js is available
+window.addEventListener('DOMContentLoaded', function() {
+    // Check if handTrack is available
+    if (typeof handTrack !== 'undefined') {
+        console.log('HandTrack.js loaded successfully');
+        init();
+    } else {
+        console.error('HandTrack.js failed to load');
+        // Try again after a short delay
+        setTimeout(function() {
+            if (typeof handTrack !== 'undefined') {
+                console.log('HandTrack.js loaded on retry');
+                init();
+            } else {
+                console.error('HandTrack.js still not available after retry');
+                // Show error message to user
+                document.body.innerHTML = '<div style="color: white; text-align: center; padding: 50px; font-family: Arial;">Error: HandTrack.js library failed to load. Please refresh the page.</div>';
+            }
+        }, 2000);
+    }
+});
